@@ -1,0 +1,8 @@
+# Ignored in every repo; git reads ~/.config/git/ignore by default.
+# See: https://git-scm.com/docs/gitignore
+
+# Aider AI coding assistant patterns
+#.aider*
+
+# JetBrains IDEs config and state files
+#.idea/

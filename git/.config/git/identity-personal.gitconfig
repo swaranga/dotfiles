@@ -1,0 +1,3 @@
+[user]
+	email = sarma.swaranga@gmail.com
+	signingKey = ~/.ssh/id_ed25519_github.pub

@@ -1,0 +1,51 @@
+# Shared by every machine. Read before the machine-local ~/.gitconfig (signing and whatever
+# tools write there), which wins on conflicts. The includes at the bottom pick the identity.
+# Includes Omarchy's defaults, which used to live in this file on Omarchy.
+[user]
+	name = Swaranga Sarma
+	useConfigOnly = true     # no identity matched -> refuse to commit
+[gpg]
+	format = ssh             # only matters where signing is turned on
+[core]
+	editor = vim
+[init]
+	defaultBranch = master
+[pull]
+	rebase = true 			 # Rebase (instead of merge) on pull
+[push]
+	autoSetupRemote = true   # Automatically set upstream branch on push
+[diff]
+	algorithm = histogram    # Clearer diffs on moved/edited lines
+	colorMoved = plain       # Highlight moved blocks in diffs
+	mnemonicPrefix = true    # More intuitive refs in diff output
+[commit]
+	verbose = true           # Include diff comment in commit message template
+[column]
+	ui = auto 			     # Output in columns when possible
+[branch]
+	sort = -committerdate    # Sort branches by most recent commit first
+[tag]
+	sort = -version:refname  # Sort version numbers as you would expect
+[rerere]
+	enabled = true           # Record and reuse conflict resolutions
+	autoupdate = true        # Apply stored conflict resolutions automatically
+[stash]
+	showIncludeUntrackedFiles = true
+[alias]
+	co = checkout
+	ci = commit
+	st = status
+	fork = "!f() { git branch \"$1\" \"$2\"; }; f"
+	ll = log --oneline
+	gl = config --global -l
+	search = !git rev-list --all | xargs git grep -F
+	dag = log --graph --format=\"format:%C(yellow)%h%C(reset) %C(blue)%an <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s\" --date-order
+	br = branch --format=\"%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(contents:subject) %(color:green)(%(committerdate:relative)) [%(authorname)]\" --sort=-committerdate
+	dlog = "!f() { GIT_EXTERNAL_DIFF=difft git log -p --ext-diff $@; }; f"
+[includeIf "hasconfig:remote.*.url:git@github.com:*/**"]
+	path = ~/.config/git/identity-personal.gitconfig
+[includeIf "hasconfig:remote.*.url:https://github.com/**"]
+	path = ~/.config/git/identity-personal.gitconfig
+# Optional overlay; must stay last so its identities win. Git ignores a missing include.
+[include]
+	path = ~/.config/git/overlay.gitconfig
