@@ -35,11 +35,19 @@ if [ -z "$XDG_DATA_HOME" ] ; then
     export XDG_DATA_HOME="$HOME/.local/share"
 fi
 
+# mise (JDKs, node, fzf, eza, zoxide, ...). After the PATH entries above so its tools come
+# first, and before the `command -v` checks below so they can see what it provides.
+if command -v mise > /dev/null 2>&1; then
+    eval "$(mise activate "$__SH_KIND")"
+fi
+
 # set eza config directory
 export EZA_CONFIG_DIR=~/.config/eza
 
-alias ls="eza --icons --group-directories-first"
-alias ll="eza --icons --group-directories-first -lh"
+if command -v eza > /dev/null 2>&1; then
+    alias ls="eza --icons --group-directories-first"
+    alias ll="eza --icons --group-directories-first -lh"
+fi
 alias tsup="sudo tailscale up --netfilter-mode=nodivert --ssh"
 alias tsdown="sudo tailscale down"
 # alias bat="batcat"
@@ -57,7 +65,7 @@ alias grl="./gradlew generateLock saveLock"
 alias grep="grep --color"
 alias tailf="tail -f"
 
-# Switch the JDK for this shell only (needs `mise activate`, see the per-host rc files)
+# Switch the JDK for this shell only (mise is activated above)
 alias java17='mise shell java@zulu-17'
 alias java21='mise shell java@zulu-21'
 alias java25='mise shell java@zulu-25'

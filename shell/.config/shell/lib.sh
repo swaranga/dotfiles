@@ -41,3 +41,15 @@ __sh_confirm() {
         *) return 1 ;;
     esac
 }
+
+# Source $1/*.sh plus $1/*.<current shell>, in lexical order. A missing or empty dir is fine;
+# zsh would otherwise abort on the unmatched glob. Under zsh, setopt inside a conf.d file is
+# scoped to this function, so shell options belong in the rc file.
+__sh_source_dir() {
+    [ -d "$1" ] || return 0
+    [ "$__SH_KIND" = zsh ] && setopt localoptions nullglob
+    local f
+    for f in "$1"/*; do
+        case "$f" in *.sh|*."$__SH_KIND") . "$f" ;; esac
+    done
+}
