@@ -10,6 +10,8 @@ dloom link shell zsh bash git ssh mise eza ghostty    # plus hyprland on Omarchy
 mise install
 ```
 
+Full per-OS steps (packages, keys, signing, moving from the old checkout) are in [SETUP.md](SETUP.md).
+
 These stay machine-local and are never linked:
 
 - `~/.zshrc` / `~/.bashrc`: end with `source ~/.config/zsh/.zshrc` / `source ~/.config/bash/.bashrc`.
