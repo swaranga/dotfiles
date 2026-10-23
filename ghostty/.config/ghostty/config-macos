@@ -1,0 +1,9 @@
+# No Omarchy theme to follow here; Catppuccin Mocha matches the kitty and
+# alacritty configs in this repo
+theme = Catppuccin Mocha
+
+# macOS sizes fonts at 72 dpi and Linux/GTK at 96, so the same point size
+# renders 25% smaller here: 16 on macOS is about 12 on Linux
+font-size = 16
+
+# No `command`: Ghostty starts the login shell (/bin/zsh) -- there is no /usr/bin/zsh on macOS

@@ -1,0 +1,12 @@
+[
+    { "keys": ["ctrl+alt+w"], "command": "force_close_tab" },
+    {
+       "keys": ["alt+1"],
+       "command": "terminus_open",
+       "args" : {
+           "cmd": "zsh",
+           "cwd": "${file_path:${folder}}",
+           "panel_name": "Terminus"
+       }
+   }
+]

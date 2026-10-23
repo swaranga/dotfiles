@@ -1,0 +1,12 @@
+# Dynamic theme colors
+config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"
+
+# Window
+window-theme = ghostty
+gtk-toolbar-style = flat
+
+# Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
+async-backend = epoll
+
+# shell
+command = /usr/bin/zsh

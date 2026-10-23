@@ -1,0 +1,14 @@
+// Settings in here override those in "Default/Preferences.sublime-settings",
+// and are overridden in turn by syntax-specific settings.
+{
+	"font_face": "Consolas",
+	"translate_tabs_to_spaces": true,
+	"font_size": 11,
+	"ignored_packages":
+	[
+		"LSP",
+		"LSP-copilot",
+		"Vintage",
+	],
+	"index_files": false,
+}

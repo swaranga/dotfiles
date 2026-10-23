@@ -1,0 +1,20 @@
+[
+   {
+        "caption": "Terminal (panel)",
+        "command": "terminus_open",
+        "args"   : {
+           "cmd": "zsh",
+           "cwd": "${file_path:${folder}}",
+           "title": "Command Prompt",
+           "panel_name": "Terminus"
+        }
+   },
+   {
+        "caption": "Extract Nested Json",
+        "command": "extract_nested_json"
+   },
+   {
+        "caption": "Dequote Json String",
+        "command": "dequote_json_string"
+   }
+]
