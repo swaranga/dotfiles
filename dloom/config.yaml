@@ -10,36 +10,6 @@ link_overrides:
     file_overrides:
       "config.yaml":
         target_dir: "~/.config/dloom"
-  zsh:
-    file_overrides:
-      ".zshrc-ubuntu.zsh":
-        target_name: ".zshrc"
-        conditions:
-          os: ["linux"]
-          distro: ["ubuntu"]
-      ".zshrc-macos.zsh":
-        target_name: ".zshrc"
-        conditions:
-          os: ["darwin"]
-      ".zshrc-omarchy-quattro.zsh":
-        target_name: ".zshrc"
-        conditions:
-          os: ["linux"]
-  bash:
-    file_overrides:
-      ".bashrc-ubuntu.bash":
-        target_name: ".bashrc"
-        conditions:
-          os: ["linux"]
-          distro: ["ubuntu"]
-      ".bashrc-macos.bash":
-        target_name: ".bashrc"
-        conditions:
-          os: ["darwin"]
-      ".bashrc-omarchy-quattro.bash":
-        target_name: ".bashrc"
-        conditions:
-          os: ["linux"]
   ghostty:
     file_overrides:
       # included from "config"; only the current OS's file gets linked
@@ -49,34 +19,6 @@ link_overrides:
       "config-macos":
         conditions:
           os: ["darwin"]
-  waybar:
-    file_overrides:
-      "config_hyprland.jsonc":
-        target_name: "config.jsonc"
-        conditions:
-          executable: ["hyprland"]
-      "config_sway.jsonc":
-        target_name: "config.jsonc"
-        conditions:
-          executable: ["sway"]
-      "start_waybar_sway.sh":
-        target_name: "start_waybar.sh"
-        conditions:
-          executable: ["sway"]
-      "regex:^.*hyprland.*": # Regex to match all other files with hyprland in the name
-        conditions:
-          executable: ["hyprland"]
-      "regex:^.*sway.*": # Regex to match all other files with sway in the name
-        conditions:
-          executable: ["sway"]
-  wallpapers:
-    source_dir: "resources/wallpapers"
-    target_dir: "~/Pictures/wallpapers"
-  fonts:
-    source_dir: "resources/fonts"
-    target_dir: "~/.local/share/fonts"
-  openvpn:
-    target_dir: "/etc/openvpn"
-  git:
-    target_dir: "~"
-
+  hyprland:
+    conditions:
+      executable: ["hyprland"]
