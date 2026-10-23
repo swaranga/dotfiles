@@ -1,7 +1,7 @@
 # git aliases
 alias gstat="git status"
 alias glog="git log -n 5"
-alias gcm="git commit -S -m"
+alias gcm="git commit -m"
 alias glg="git log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' -n 30 --all"
 alias gamend="git commit --amend"
 
@@ -179,7 +179,7 @@ function gdiff() {
 function gclone() {
     # Check if a repository URL is provided
     if [ -z "$1" ]; then
-        echo "Usage: git_clone_with_gpg <repository-url> [directory]"
+        echo "Usage: gclone <repository-url> [directory]"
         return 1
     fi
 
@@ -265,66 +265,8 @@ function gclone() {
 
     cd "$repo_dir" || return
 
-    # List GPG keys with associated information
-    local -a gpg_keys_info=()
-    local -a gpg_keys=()
-    while IFS= read -r line; do
-        if [[ $line == sec* ]]; then
-            # Extract key ID using Zsh's parameter expansion
-            key_id=${line#*/}       # Remove everything up to and including the '/'
-            key_id=${key_id%% *}    # Remove everything after the first space
-            gpg_keys+=("$key_id")
-        elif [[ $line == uid* ]]; then
-            # Extract name and email by removing 'uid [something] ' using pattern matching
-            name_email=${line#*] }  # Remove everything up to and including the '] '
-            gpg_keys_info+=("$name_email")
-        fi
-    done < <(gpg --list-secret-keys --keyid-format LONG)
-
-    if [ ${#gpg_keys[@]} -eq 0 ]; then
-        echo "No GPG keys found."
-    else
-        # Add an option for no GPG key
-        echo "Select a GPG key to use for signing commits:"
-        echo "----------------------------------------"
-        # Add an option for no GPG key
-        echo "0) No GPG key (commits will not be signed) [Default]"
-        # Display GPG keys with numbers, names, and emails
-        local i=1
-        for ignored in "${gpg_keys[@]}"; do
-            echo "$i) $(__sh_nth "$i" "${gpg_keys[@]}") - $(__sh_nth "$i" "${gpg_keys_info[@]}")"
-            i=$((i + 1))
-        done
-    fi
-
-    # Ask the user to select a GPG key by number
-    local choice
-    while true; do
-        echo -n "Enter choice (default is 0): "
-        read choice
-        if [[ -z "$choice" ]]; then
-            choice=0
-            break
-        elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 0 ] && [ "$choice" -le ${#gpg_keys[@]} ]; then
-            break
-        else
-            echo "Invalid selection. Please enter a valid number."
-        fi
-    done
-
-    # Configure the repository based on the user's choice
-    if [ "$choice" -eq 0 ]; then
-        git config commit.gpgSign false
-        echo "Repository cloned without GPG signing configuration."
-    else
-        local selected_key selected_name
-        selected_key=$(__sh_nth "$choice" "${gpg_keys[@]}")
-        selected_name=$(__sh_nth "$choice" "${gpg_keys_info[@]}")
-        git config user.signingkey "$selected_key"
-        git config commit.gpgSign true
-        echo "Repository cloned and configured to sign commits with GPG key $selected_key ($selected_name)."
-    fi
-
+    # Signing is left alone: ~/.gitconfig turns it on per machine and the identity
+    # included for the remote picks the key
     echo "Repository cloned successfully."
 }
 
