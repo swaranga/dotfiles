@@ -1,0 +1,14 @@
+[tools]
+# The first java is the default; java17/java21/java25 in common.sh switch it per shell
+java = ["zulu-25.36.205.0", "zulu-21.52.203.0", "zulu-17.68.203.0"]
+node = "26.7.0"
+bat = "0.26.1"
+delta = "0.20.1"
+difftastic = "0.71.0"
+# eza publishes no macOS builds; brew provides it there
+eza = { version = "0.23.5", os = ["linux"] }
+fzf = "0.74.5"
+zoxide = "0.10.0"
+
+[settings.upgrade]
+auto_prune = false
