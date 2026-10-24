@@ -207,12 +207,15 @@ To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (i
      AddKeysToAgent yes
    ```
 
-   Then create the key and upload it for authentication and signing:
+   Then create the key and upload it for authentication and signing. gh signs in through a browser, and its device
+   page authorizes whichever account that browser is logged in as. The personal account lives in Firefox, so
+   `GH_BROWSER` sends gh there even when another browser (say, one logged in to a work account) is the default. Check
+   that the device page names swaranga before authorizing.
 
    ```sh
    ssh-keygen -t ed25519 -C "$(hostname)" -f ~/.ssh/id_ed25519_github
    ssh-add --apple-use-keychain ~/.ssh/id_ed25519_github
-   gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
+   GH_BROWSER="open -a Firefox" gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type authentication --title "$(hostname)"
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type signing --title "$(hostname)"
    ssh -T git@github.com    # Hi swaranga!
@@ -278,7 +281,7 @@ until the end, so any step can be undone by relinking from it. Keep a terminal o
    `~/.ssh/id_ed25519_github` is the key step 6 would create, so don't run `ssh-keygen` (it would overwrite the key
    GitHub knows) and skip the authentication upload. Add the keychain lines, run the `ssh-add` and the
    `--type signing` upload from step 6 (if gh is already logged in, first
-   `gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 7.
+   `GH_BROWSER="open -a Firefox" gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 7.
 
 Afterwards brew's bat, fzf, zoxide, git-delta and difftastic are shadowed by mise's copies in the shell, and gnupg and
 pinentry-mac go unused once signing uses ssh; `brew uninstall` them if you like.
