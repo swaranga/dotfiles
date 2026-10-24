@@ -13,7 +13,7 @@ commands copy those defaults over the files, which through a link writes into th
 1. **Packages.** Omarchy already has git, mise, eza, fzf, zoxide and bat; dloom comes from the AUR.
 
    ```sh
-   sudo pacman -S --needed zsh github-cli ghostty sublime-text-4
+   sudo pacman -S --needed zsh github-cli ghostty sublime-text-4 brave-origin-bin
    yay -S --needed dloom-bin
    ```
 
@@ -49,11 +49,15 @@ commands copy those defaults over the files, which through a link writes into th
 
 6. **SSH key for github.com.** One key per machine, never copied. Start the machine-local `~/.ssh/config` with
    `Include ~/.ssh/config.d/*`, before any `Host` block. Then create the key and upload it for authentication and
-   signing:
+   signing. gh signs in through a browser, and its device page authorizes whichever GitHub account is active there.
+   `GH_BROWSER` sends gh to Brave Origin, where the GitHub accounts are logged in, whatever the default browser is.
+   gh waits for that command to exit, so `uwsm-app -t service` starts the browser as a service of its own and
+   returns. Check that the device page names swaranga before authorizing, and switch accounts in GitHub's account
+   menu if it doesn't.
 
    ```sh
    ssh-keygen -t ed25519 -C "$(hostname)" -f ~/.ssh/id_ed25519_github
-   gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
+   GH_BROWSER="uwsm-app -t service -- brave-origin" gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type authentication --title "$(hostname)"
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type signing --title "$(hostname)"
    ssh -T git@github.com    # Hi swaranga!
@@ -142,7 +146,8 @@ files, which the unlink puts back from dloom's backups.
 7. **Check** in a new terminal (step 9). Commits stay unsigned until you set up signing, which can wait. The existing
    `~/.ssh/id_ed25519_github` is the key step 6 above would create, so don't run `ssh-keygen` (it would overwrite
    the key GitHub knows) and skip the authentication upload. Run
-   `gh auth refresh -h github.com -s admin:ssh_signing_key` and that step's `--type signing` upload, then step 8.
+   `GH_BROWSER="uwsm-app -t service -- brave-origin" gh auth refresh -h github.com -s admin:ssh_signing_key` and
+   that step's `--type signing` upload, then step 8.
 
 To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (it puts back the files it replaced),
 `dloom link` the old ones from the old checkout, and restore `~/.gitconfig` and `~/.ssh/config` from the tarball.
@@ -159,6 +164,7 @@ To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (i
    echo 'eval "$(/opt/homebrew/bin/brew shellenv zsh)"' >> ~/.zprofile
    eval "$(/opt/homebrew/bin/brew shellenv zsh)"
    brew install git gh mise eza
+   brew install --cask brave-browser
    brew tap dloomorg/dloom https://github.com/dloomorg/dloom
    brew install dloomorg/dloom/dloom
    ```
@@ -215,14 +221,14 @@ To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (i
    ```
 
    Then create the key and upload it for authentication and signing. gh signs in through a browser, and its device
-   page authorizes whichever account that browser is logged in as. The personal account lives in Firefox, so
-   `GH_BROWSER` sends gh there even when another browser (say, one logged in to a work account) is the default. Check
-   that the device page names swaranga before authorizing.
+   page authorizes whichever GitHub account is active there. `GH_BROWSER` sends gh to Brave, where the GitHub
+   accounts are logged in, whatever the default browser is. Check that the device page names swaranga before
+   authorizing, and switch accounts in GitHub's account menu if it doesn't.
 
    ```sh
    ssh-keygen -t ed25519 -C "$(hostname)" -f ~/.ssh/id_ed25519_github
    ssh-add --apple-use-keychain ~/.ssh/id_ed25519_github
-   GH_BROWSER="open -a Firefox" gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
+   GH_BROWSER="open -a 'Brave Browser'" gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type authentication --title "$(hostname)"
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type signing --title "$(hostname)"
    ssh -T git@github.com    # Hi swaranga!
@@ -295,7 +301,7 @@ until the end, so any step can be undone by relinking from it. Keep a terminal o
    `~/.ssh/id_ed25519_github` is the key step 6 above would create, so don't run `ssh-keygen` (it would overwrite
    the key GitHub knows) and skip the authentication upload. Add the keychain lines, run that step's `ssh-add` and
    `--type signing` upload (if gh is already logged in, first
-   `GH_BROWSER="open -a Firefox" gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 8.
+   `GH_BROWSER="open -a 'Brave Browser'" gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 8.
 
 Afterwards brew's bat, fzf, zoxide, git-delta and difftastic are shadowed by mise's copies in the shell, and gnupg and
 pinentry-mac go unused once signing uses ssh; `brew uninstall` them if you like.
