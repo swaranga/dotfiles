@@ -80,7 +80,8 @@ Manual steps per OS. Omarchy and Ubuntu sections are still to be written.
    git -C ~/Work/dotfiles/personal remote set-url origin git@github.com:swaranga/dotfiles.git
    ```
 
-7. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key.
+7. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key. Turn it
+   on only once every identity you commit as has its key: a missing key makes those commits fail.
 
    ```sh
    git config --global commit.gpgSign true
@@ -97,8 +98,9 @@ Manual steps per OS. Omarchy and Ubuntu sections are still to be written.
 
 ### Moving a Mac from the old dotfiles checkout
 
-The old checkout stays untouched until the end, so any step can be undone by relinking from it. Keep a terminal open
-until a new one works.
+For a Mac set up from the old checkout: Homebrew and the step 1 tools, oh-my-zsh, the fonts and
+`~/.ssh/id_ed25519_github` are already there, so steps 1, 2 and 5 above don't apply. The old checkout stays untouched
+until the end, so any step can be undone by relinking from it. Keep a terminal open until a new one works.
 
 1. **Back up** the current links and files (tar keeps symlinks as symlinks):
 
@@ -125,14 +127,22 @@ until a new one works.
    find ~ -maxdepth 4 -type l -lname "$old_checkout/*"    # should print nothing
    ```
 
-4. **Link the new packages:** steps 3 and 4 above, without the `touch` and the `echo` lines (`~/.zshrc` and
+4. **Link the new packages.** If `git --version` is older than 2.36, `brew install git` first: the identity includes
+   need it. Then steps 3 and 4 above, without the `touch` and the `echo` lines (`~/.zshrc` and
    `~/.bashrc` already source those paths). dloom asks before replacing real files such as `~/.config/mise/config.toml`;
    answer yes, the originals go to `~/.dloom/backups`. The default JDK is now zulu 25.
 
 5. **SSH:** put the `Include` line from step 6 first in `~/.ssh/config` and delete the old inline `Host github.com`
    block; `config.d/github.conf` replaces it. `ssh -T git@github.com` should still greet you.
 
-6. **Check** in a new terminal (step 8). Keys and signing (steps 6 and 7) can wait; until then commits are unsigned.
+6. **Check** in a new terminal (step 8). Commits stay unsigned until you set up signing, which can wait. The existing
+   `~/.ssh/id_ed25519_github` is the key step 6 would create, so don't run `ssh-keygen` (it would overwrite the key
+   GitHub knows) and skip the authentication upload. Add the keychain lines, run the `ssh-add` and the
+   `--type signing` upload from step 6 (if gh is already logged in, first
+   `gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 7.
+
+Afterwards brew's bat, fzf, zoxide, git-delta and difftastic are shadowed by mise's copies in the shell, and gnupg and
+pinentry-mac go unused once signing uses ssh; `brew uninstall` them if you like.
 
 To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal`, `dloom link` the old ones from the old
 checkout, and restore `~/.gitconfig` from the tarball.
