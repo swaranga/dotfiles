@@ -1,6 +1,144 @@
 # Setup
 
-Manual steps per OS. Omarchy and Ubuntu sections are still to be written.
+Manual steps per OS. The Ubuntu section is still to be written.
+
+## Omarchy
+
+Omarchy ships defaults for some of the files linked here (`~/.config/git/config`, the Hyprland files). Its refresh
+commands copy those defaults over the files, which through a link writes into this repo; the change then shows up in
+`git status` here, to keep or revert.
+
+### New Omarchy machine
+
+1. **Packages.** Omarchy already has git, mise, eza, fzf, zoxide and bat; dloom comes from the AUR.
+
+   ```sh
+   sudo pacman -S --needed zsh github-cli ghostty sublime-text-4
+   yay -S --needed dloom-bin
+   ```
+
+2. **oh-my-zsh.** Leave the login shell as bash: Ghostty starts zsh itself (`command` in `config-linux`).
+
+   ```sh
+   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+   git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+   sed -i 's/^plugins=(git)$/plugins=(git zsh-autosuggestions zsh-syntax-highlighting)/' ~/.zshrc
+   ```
+
+3. **Link the dotfiles.** `~/.gitconfig` has to be a real file first: when it's missing, `git config --global` writes
+   into the linked `~/.config/git/config`, i.e. into this repo. dloom asks before replacing files Omarchy put there,
+   such as `~/.config/git/config` (its defaults are part of this repo's) and the Hyprland files; answer yes, the
+   originals go to `~/.dloom/backups`. dloom goes last, since its questions would read any pasted lines after it.
+   `monitors.lua` pins workspaces to monitors by host name; add a branch for a new machine's monitors.
+
+   ```sh
+   touch ~/.gitconfig
+   git clone https://github.com/swaranga/dotfiles ~/Work/dotfiles/personal
+   echo 'source ~/.config/zsh/.zshrc' >> ~/.zshrc
+   echo 'source ~/.config/bash/.bashrc' >> ~/.bashrc
+   cd ~/Work/dotfiles/personal
+   dloom link dloom shell zsh bash git ssh mise eza ghostty hyprland sublime-text
+   ```
+
+4. **Tools and JDKs.** `mise install` installs the pinned tools and the zulu JDKs (25 is the default; `java17`,
+   `java21`, `java25` switch per shell).
+
+5. **Fonts.** Ghostty and Sublime use Consolas (ligaturized). It's licensed, so it isn't in this repo: copy the
+   `.ttf` files from your private copy into `~/.local/share/fonts`, then run `fc-cache -f`.
+
+6. **SSH key for github.com.** One key per machine, never copied. Start the machine-local `~/.ssh/config` with
+   `Include ~/.ssh/config.d/*`, before any `Host` block. Then create the key and upload it for authentication and
+   signing:
+
+   ```sh
+   ssh-keygen -t ed25519 -C "$(hostname)" -f ~/.ssh/id_ed25519_github
+   gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
+   GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type authentication --title "$(hostname)"
+   GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type signing --title "$(hostname)"
+   ssh -T git@github.com    # Hi swaranga!
+   git -C ~/Work/dotfiles/personal remote set-url origin git@github.com:swaranga/dotfiles.git
+   ```
+
+7. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key. Turn it
+   on only once every identity you commit as has its key: a missing key makes those commits fail.
+
+   ```sh
+   git config --global commit.gpgSign true
+   git config --global tag.gpgSign true
+   ```
+
+8. **Check** in a new terminal.
+
+   ```sh
+   git -C ~/Work/dotfiles/personal config user.email    # sarma.swaranga@gmail.com
+   zsh -ic 'type gswitch'; bash -ic 'type gswitch'
+   hyprctl configerrors                                 # nothing
+   find ~/.config ~/.ssh -xtype l -lname "$HOME/Work/dotfiles/*"    # broken links into the repos: nothing
+   ```
+
+### Moving an Omarchy machine from the old dotfiles checkout
+
+The old checkout stays untouched until the end, so any step can be undone by relinking from it. Keep a terminal open
+until a new one works. Between the unlink and the link in step 4, Hyprland and new terminals run on Omarchy's own
+files, which the unlink puts back from dloom's backups.
+
+1. **Back up** the current links and files (tar keeps symlinks as symlinks):
+
+   ```sh
+   tar -czf ~/dotfiles-before-switch.tgz -C ~ .gitconfig .ssh/config .config/git .config/mise .config/shell \
+       .config/zsh .config/bash .config/dloom .config/ghostty .config/hypr .config/sublime-text .local/share/fonts \
+       2>/dev/null
+   ```
+
+2. **Make `~/.gitconfig` a real file,** then delete everything `~/.config/git/config` and the identity files now
+   provide (user, email, signing key, aliases, core, pull, rerere, stash, excludesFile, credential, and any
+   `[maintenance]` entry for a repo this machine doesn't have). Keep only what's specific to this machine, such as
+   blocks another tool maintains. Leave signing off for now.
+
+   ```sh
+   cp --remove-destination "$(readlink -f ~/.gitconfig)" ~/.gitconfig
+   ```
+
+3. **Keep what the new repo doesn't carry.** The fonts and Sublime's Scratchpad workspace are links into the old
+   checkout; make them real files:
+
+   ```sh
+   for f in ~/.local/share/fonts/Consolas*.ttf ~/.config/sublime-text/Projects/Scratchpad.sublime-workspace; do
+       cp --remove-destination "$(readlink -f "$f")" "$f"
+   done
+   fc-cache -f
+   ```
+
+4. **Swap the packages:** unlink the old ones from the old checkout, so dloom reads that repo's config, then link the
+   new ones, Hyprland first. `git` needs no unlinking: step 2 replaced its only link. The swap is a single command, so
+   dloom's questions can't read pasted lines. Answer yes each time it asks to replace a file: Omarchy's originals that
+   the unlink put back, `~/.config/git/config`, `~/.config/mise/config.toml` and `monitors.lua` (they go to
+   `~/.dloom/backups`).
+
+   ```sh
+   old_checkout=$(readlink ~/.config/zsh/.zshrc); old_checkout=${old_checkout%/zsh/.config/zsh/*}
+   (cd "$old_checkout" && dloom unlink dloom shell zsh bash ghostty hyprland sublime-text) &&
+       cd ~/Work/dotfiles/personal && dloom link hyprland dloom shell zsh bash git ssh mise eza ghostty sublime-text
+   ```
+
+   Then:
+
+   ```sh
+   find ~ -maxdepth 5 -type l -lname "$old_checkout/*"    # should print nothing
+   mise install
+   ```
+
+5. **SSH:** put the `Include` line from step 6 first in `~/.ssh/config` and delete the old inline `Host github.com`
+   block; `config.d/github.conf` replaces it. `ssh -T git@github.com` should still greet you.
+
+6. **Check** in a new terminal (step 8). Commits stay unsigned until you set up signing, which can wait. The existing
+   `~/.ssh/id_ed25519_github` is the key step 6 would create, so don't run `ssh-keygen` (it would overwrite the key
+   GitHub knows) and skip the authentication upload. Run `gh auth refresh -h github.com -s admin:ssh_signing_key`
+   and the `--type signing` upload from step 6, then step 7.
+
+To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (it puts back the files it replaced),
+`dloom link` the old ones from the old checkout, and restore `~/.gitconfig` and `~/.ssh/config` from the tarball.
 
 ## macOS
 
@@ -29,15 +167,16 @@ Manual steps per OS. Omarchy and Ubuntu sections are still to be written.
 
 3. **Link the dotfiles.** `~/.gitconfig` has to be a real file first: when it's missing, `git config --global` writes
    into the linked `~/.config/git/config`, i.e. into this repo. Run dloom from the checkout; it reads
-   `dloom/config.yaml` from the current directory.
+   `dloom/config.yaml` from the current directory. It goes last, since its questions would read any pasted lines
+   after it.
 
    ```sh
    touch ~/.gitconfig
    git clone https://github.com/swaranga/dotfiles ~/Work/dotfiles/personal
-   cd ~/Work/dotfiles/personal
-   dloom link dloom shell zsh bash git ssh mise eza ghostty
    echo 'source ~/.config/zsh/.zshrc' >> ~/.zshrc
    echo 'source ~/.config/bash/.bashrc' >> ~/.bashrc
+   cd ~/Work/dotfiles/personal
+   dloom link dloom shell zsh bash git ssh mise eza ghostty
    ```
 
 4. **Tools and JDKs.** `mise install` installs the pinned tools and the zulu JDKs (25 is the default; `java17`,
@@ -93,7 +232,7 @@ Manual steps per OS. Omarchy and Ubuntu sections are still to be written.
    ```sh
    git -C ~/Work/dotfiles/personal config user.email    # sarma.swaranga@gmail.com
    zsh -ic 'type gswitch'; bash -ic 'type gswitch'
-   find ~/.config ~/.local ~/.ssh -type l ! -exec test -e {} \; -print    # dangling links: nothing
+   find ~/.config ~/.ssh -type l -lname "$HOME/Work/dotfiles/*" ! -exec test -e {} \; -print    # broken links into the repos: nothing
    ```
 
 ### Moving a Mac from the old dotfiles checkout
