@@ -60,7 +60,10 @@ commands copy those defaults over the files, which through a link writes into th
    git -C ~/Work/dotfiles/personal remote set-url origin git@github.com:swaranga/dotfiles.git
    ```
 
-7. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key. Turn it
+7. **Private overlay.** If this machine gets one, install it now, following its own README. It goes on top of
+   this layer and brings identities and keys of its own, which signing waits for.
+
+8. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key. Turn it
    on only once every identity you commit as has its key: a missing key makes those commits fail.
 
    ```sh
@@ -68,7 +71,7 @@ commands copy those defaults over the files, which through a link writes into th
    git config --global tag.gpgSign true
    ```
 
-8. **Check** in a new terminal.
+9. **Check** in a new terminal.
 
    ```sh
    git -C ~/Work/dotfiles/personal config user.email    # sarma.swaranga@gmail.com
@@ -129,13 +132,17 @@ files, which the unlink puts back from dloom's backups.
    mise install
    ```
 
-5. **SSH:** put the `Include` line from step 6 first in `~/.ssh/config` and delete the old inline `Host github.com`
-   block; `config.d/github.conf` replaces it. `ssh -T git@github.com` should still greet you.
+5. **SSH:** put the `Include` line from step 6 above first in `~/.ssh/config` and delete the old inline
+   `Host github.com` block; `config.d/github.conf` replaces it. `ssh -T git@github.com` should still greet you.
 
-6. **Check** in a new terminal (step 8). Commits stay unsigned until you set up signing, which can wait. The existing
-   `~/.ssh/id_ed25519_github` is the key step 6 would create, so don't run `ssh-keygen` (it would overwrite the key
-   GitHub knows) and skip the authentication upload. Run `gh auth refresh -h github.com -s admin:ssh_signing_key`
-   and the `--type signing` upload from step 6, then step 7.
+6. **Private overlay,** if this machine has one: install it now, following its own README. Until then whatever it
+   took over from the old checkout, such as aliases, is missing, and repos whose identity it sets can't commit: no
+   identity matches, and `useConfigOnly` keeps git from guessing one.
+
+7. **Check** in a new terminal (step 9). Commits stay unsigned until you set up signing, which can wait. The existing
+   `~/.ssh/id_ed25519_github` is the key step 6 above would create, so don't run `ssh-keygen` (it would overwrite
+   the key GitHub knows) and skip the authentication upload. Run
+   `gh auth refresh -h github.com -s admin:ssh_signing_key` and that step's `--type signing` upload, then step 8.
 
 To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (it puts back the files it replaced),
 `dloom link` the old ones from the old checkout, and restore `~/.gitconfig` and `~/.ssh/config` from the tarball.
@@ -222,7 +229,10 @@ To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (i
    git -C ~/Work/dotfiles/personal remote set-url origin git@github.com:swaranga/dotfiles.git
    ```
 
-7. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key. Turn it
+7. **Private overlay.** If this machine gets one, install it now, following its own README. It goes on top of
+   this layer and brings identities and keys of its own, which signing waits for.
+
+8. **Signing.** Turned on per machine in `~/.gitconfig`; the identity matched by the remote picks the key. Turn it
    on only once every identity you commit as has its key: a missing key makes those commits fail.
 
    ```sh
@@ -230,7 +240,7 @@ To roll back: `dloom unlink` the new packages from `~/Work/dotfiles/personal` (i
    git config --global tag.gpgSign true
    ```
 
-8. **Check.**
+9. **Check.**
 
    ```sh
    git -C ~/Work/dotfiles/personal config user.email    # sarma.swaranga@gmail.com
@@ -253,7 +263,7 @@ until the end, so any step can be undone by relinking from it. Keep a terminal o
 
 2. **Make `~/.gitconfig` a real file,** then delete everything `~/.config/git/config` and the identity files now
    provide (user, email, signing key, aliases, core, pull, rerere, stash, excludesFile, credential). Keep only what's
-   specific to this machine, such as blocks another tool maintains. Leave signing off until step 7 above.
+   specific to this machine, such as blocks another tool maintains. Leave signing off until step 8 above.
 
    ```sh
    cp "$(readlink ~/.gitconfig)" ~/.gitconfig.new && mv ~/.gitconfig.new ~/.gitconfig
@@ -274,14 +284,18 @@ until the end, so any step can be undone by relinking from it. Keep a terminal o
    `~/.bashrc` already source those paths). dloom asks before replacing real files such as `~/.config/mise/config.toml`;
    answer yes, the originals go to `~/.dloom/backups`. The default JDK is now zulu 25.
 
-5. **SSH:** put the `Include` line from step 6 first in `~/.ssh/config` and delete the old inline `Host github.com`
-   block; `config.d/github.conf` replaces it. `ssh -T git@github.com` should still greet you.
+5. **SSH:** put the `Include` line from step 6 above first in `~/.ssh/config` and delete the old inline
+   `Host github.com` block; `config.d/github.conf` replaces it. `ssh -T git@github.com` should still greet you.
 
-6. **Check** in a new terminal (step 8). Commits stay unsigned until you set up signing, which can wait. The existing
-   `~/.ssh/id_ed25519_github` is the key step 6 would create, so don't run `ssh-keygen` (it would overwrite the key
-   GitHub knows) and skip the authentication upload. Add the keychain lines, run the `ssh-add` and the
-   `--type signing` upload from step 6 (if gh is already logged in, first
-   `GH_BROWSER="open -a Firefox" gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 7.
+6. **Private overlay,** if this machine has one: install it now, following its own README. Until then whatever it
+   took over from the old checkout, such as aliases, is missing, and repos whose identity it sets can't commit: no
+   identity matches, and `useConfigOnly` keeps git from guessing one.
+
+7. **Check** in a new terminal (step 9). Commits stay unsigned until you set up signing, which can wait. The existing
+   `~/.ssh/id_ed25519_github` is the key step 6 above would create, so don't run `ssh-keygen` (it would overwrite
+   the key GitHub knows) and skip the authentication upload. Add the keychain lines, run that step's `ssh-add` and
+   `--type signing` upload (if gh is already logged in, first
+   `GH_BROWSER="open -a Firefox" gh auth refresh -h github.com -s admin:ssh_signing_key`), then step 8.
 
 Afterwards brew's bat, fzf, zoxide, git-delta and difftastic are shadowed by mise's copies in the shell, and gnupg and
 pinentry-mac go unused once signing uses ssh; `brew uninstall` them if you like.
