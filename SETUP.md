@@ -47,15 +47,17 @@ commands copy those defaults over the files, which through a link writes into th
 5. **Fonts.** Ghostty and Sublime use Consolas (ligaturized). It's licensed, so it isn't in this repo: copy the
    `.ttf` files from your private copy into `~/.local/share/fonts`, then run `fc-cache -f`.
 
-6. **SSH key for github.com.** One key per machine, never copied. Start the machine-local `~/.ssh/config` with
-   `Include ~/.ssh/config.d/*`, before any `Host` block. Then create the key and upload it for authentication and
-   signing. gh signs in through a browser, and its device page authorizes whichever GitHub account is active there.
-   `GH_BROWSER` sends gh to Brave Origin, where the GitHub accounts are logged in, whatever the default browser is.
-   gh waits for that command to exit, so `uwsm-app -t service` starts the browser as a service of its own and
-   returns. Check that the device page names swaranga before authorizing, and switch accounts in GitHub's account
-   menu if it doesn't.
+6. **SSH key for github.com.** One key per machine, never copied. ssh finds it through the linked
+   `~/.ssh/config.d/github.conf`, so the machine-local `~/.ssh/config` has to start with `Include ~/.ssh/config.d/*`,
+   before any `Host` block. The first line below creates the file; if it already exists, put the line at its top
+   yourself. Then create the key and upload it for authentication and signing. gh signs in through a browser, and its
+   device page authorizes whichever GitHub account is active there. `GH_BROWSER` sends gh to Brave Origin, where the
+   GitHub accounts are logged in, whatever the default browser is. gh waits for that command to exit, so
+   `uwsm-app -t service` starts the browser as a service of its own and returns. Check that the device page names
+   swaranga before authorizing, and switch accounts in GitHub's account menu if it doesn't.
 
    ```sh
+   [ -e ~/.ssh/config ] || echo 'Include ~/.ssh/config.d/*' > ~/.ssh/config
    ssh-keygen -t ed25519 -C "$(hostname)" -f ~/.ssh/id_ed25519_github
    GH_BROWSER="uwsm-app -t service -- brave-origin" gh auth login -h github.com --scopes admin:public_key,admin:ssh_signing_key
    GH_HOST=github.com gh ssh-key add ~/.ssh/id_ed25519_github.pub --type authentication --title "$(hostname)"
