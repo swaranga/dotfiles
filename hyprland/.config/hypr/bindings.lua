@@ -29,4 +29,11 @@
 -- o.bind("SUPER + PERIOD", nil, "omarchy-shell shell toggle omarchy.emojis")
 
 -- Dropdown Terminal
-hl.bind("SUPER + GRAVE", hl.dsp.global("io.github.tuthan.dropdown-terminal:toggle"))
+o.bind("SUPER + ALT + grave", "Dropdown terminal", hl.dsp.global("io.github.tuthan.dropdown-terminal:toggle"))
+
+-- Dictation keys from before Alt + Space and Right Alt became the defaults.
+-- Remove these lines to give the keys back to applications.
+if o.dictation_installed and o.dictation_installed() then
+  o.bind("SUPER + CTRL + X", "Toggle dictation", "omarchy-dictation toggle")
+  o.bind_hold("F9", "Start dictation (push-to-talk)", "omarchy-dictation start", "Stop dictation (push-to-talk)", "omarchy-dictation stop")
+end
