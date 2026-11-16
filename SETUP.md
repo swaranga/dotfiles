@@ -30,7 +30,6 @@ commands copy those defaults over the files, which through a link writes into th
    into the linked `~/.config/git/config`, i.e. into this repo. dloom asks before replacing files Omarchy put there,
    such as `~/.config/git/config` (its defaults are part of this repo's) and the Hyprland files; answer yes, the
    originals go to `~/.dloom/backups`. dloom goes last, since its questions would read any pasted lines after it.
-   `monitors.lua` pins workspaces to monitors by host name; add a branch for a new machine's monitors.
 
    ```sh
    touch ~/.gitconfig
