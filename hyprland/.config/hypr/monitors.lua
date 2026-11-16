@@ -18,16 +18,11 @@ local handle = io.popen("hostname")
 local hostname = handle:read("*a"):gsub("%s+", "")
 handle:close()
 
+-- The monitor each SUPER+number goes to, whichever monitor has focus; bindings.lua binds the
+-- keys. Workspace rules can't pin numbers any more: Omarchy gives every monitor workspaces
+-- 1-10 of its own and renumbers a workspace that sits on another monitor's.
 if hostname == "omarchy-nflx" then
     local m1, m2, m3 = "DP-4", "DP-5", "HDMI-A-4"
-    for _, ws in ipairs({"1", "2", "3"}) do
-        hl.workspace_rule({ workspace = ws, monitor = m1 })
-    end
-    for _, ws in ipairs({"4", "5", "6"}) do
-        hl.workspace_rule({ workspace = ws, monitor = m2 })
-    end
-    for _, ws in ipairs({"7", "8", "9", "10"}) do
-        hl.workspace_rule({ workspace = ws, monitor = m3 })
-    end
+    pinned_workspaces = { m1, m1, m1, m2, m2, m2, m3, m3, m3, m3 }
 end
 
